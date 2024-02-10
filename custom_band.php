@@ -28,13 +28,15 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class CustomBand extends Module
+use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+
+class Custom_Band extends Module
 {
     protected $config_form = false;
 
     public function __construct()
     {
-        $this->name = 'custom-band';
+        $this->name = 'custom_band';
         $this->tab = 'front_office_features';
         $this->version = '1.0.0';
         $this->author = 'G_SCHNEYDER';
@@ -55,10 +57,7 @@ class CustomBand extends Module
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
-    /**
-     * Don't forget to create update methods if needed:
-     * http://doc.prestashop.com/display/PS16/Enabling+the+Auto-Update
-     */
+
     public function install()
     {
         Configuration::updateValue('CUSTOM_BAND__LIVE_MODE', false);
@@ -249,5 +248,15 @@ class CustomBand extends Module
         ]);
 
         return $this->context->smarty->fetch($this->local_path.'views/templates/front/bandeau.tpl');
+    }
+
+    public function renderWidget($hookName, array $configuration)
+    {
+        // TODO
+    }
+
+    public function getWidgetVariables($hookName, array $configuration)
+    {
+        // TODO
     }
 }
