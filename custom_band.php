@@ -30,7 +30,7 @@ if (!defined('_PS_VERSION_')) {
 
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
-class Custom_Band extends Module
+class Custom_Band extends Module implements WidgetInterface
 {
     protected $config_form = false;
 
@@ -342,7 +342,7 @@ class Custom_Band extends Module
 
     /**
      * Function for displaying a widget
-     * Example of widget {widget name='mymodule' banner_message='Welcome new customer'}
+     * Example of widget {widget name='custom_band' banner_message='Welcome new customer' banner_text_color='' banner_color='' banner_emoji_choice='' banner_defilement=''}
      * All non specified parameters will use default parameters from config
      */
     public function renderWidget($hookName, array $configuration)
