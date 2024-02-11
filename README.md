@@ -26,6 +26,8 @@ A noter que le module se greffe par défault sur le Hook Prestashop **DisplayTop
 |**banner_allow_emoji**|Boolean|
 |**banner_defilement**|Boolean|
 
+> Attention : Tout paramètre non renseigné sur le widget utilise les paramètres par défaut dans le back office du module
+
 Retrouvez la liste des emojis et leur slug [ici](https://github.com/G-SCHNEYDER/custom_band/blob/main/Ressources/emoji.json)
 
 
@@ -52,3 +54,5 @@ Please note that the module is automatically integrated into the Prestashop **Di
 
 
 Find the list of emojis and their slugs [here](https://github.com/G-SCHNEYDER/custom_band/blob/main/Ressources/emoji.json)
+
+Note: Any parameter not specified in the widget will use the default settings from the module's back office.
