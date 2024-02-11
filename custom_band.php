@@ -185,6 +185,25 @@ class Custom_Band extends Module
                             )
                         ),
                     ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Activer le défilement du texte'),
+                        'name' => 'CUSTOM_BAND_DEFILEMENT',
+                        'is_bool' => true,
+                        'desc' => $this->l('Permet l\'activation d\'un effet de défilement horizontal du texte'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => true,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => false,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -200,6 +219,7 @@ class Custom_Band extends Module
     {
         return array(
             'CUSTOM_BAND_AFFICHAGE_KDO' => Configuration::get('CUSTOM_BAND_AFFICHAGE_KDO', true),
+            'CUSTOM_BAND_DEFILEMENT' => Configuration::get('CUSTOM_BAND_DEFILEMENT', true),
             'CUSTOM_BAND_TEXT' => Configuration::get('CUSTOM_BAND_TEXT'),
             'CUSTOM_BAND_BG_COLOR' => Configuration::get('CUSTOM_BAND_BG_COLOR', null),
             'CUSTOM_BAND_TEXT_COLOR' => Configuration::get('CUSTOM_BAND_TEXT_COLOR', null),
@@ -244,19 +264,36 @@ class Custom_Band extends Module
             'banner_allow_kdo' => Configuration::get('CUSTOM_BAND_AFFICHAGE_KDO'),
             'banner_color' => Configuration::get('CUSTOM_BAND_BG_COLOR'),
             'banner_message' => Configuration::get('CUSTOM_BAND_TEXT'),
-            'banner_text_color' => Configuration::get('CUSTOM_BAND_TEXT_COLOR')
+            'banner_text_color' => Configuration::get('CUSTOM_BAND_TEXT_COLOR'),
+            'banner_defilement' => Configuration::get('CUSTOM_BAND_DEFILEMENT'),
         ]);
 
         return $this->context->smarty->fetch($this->local_path.'views/templates/front/bandeau.tpl');
     }
 
+    /**
+     * Function for displaying a widget
+     * Example of widget {widget name='mymodule' text_to_display='Welcome new customer'}
+     */
     public function renderWidget($hookName, array $configuration)
     {
-        // TODO
+        $this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
+
+        return $this->fetch('module:'.$this->name.'/views/templates/front/bandeau.tpl');
     }
 
+    /**
+     * Function to fill the widget variables
+     */
     public function getWidgetVariables($hookName, array $configuration)
     {
-        // TODO
+        $myParamKey = $configuration['text_to_display'] ?? null;
+        
+        return [
+            'my_var1' => 'my_var1_value',
+            'my_var2' => 'my_var2_value',
+            'my_var_n' => 'my_var_n_value',
+            'my_dynamic_var_by_param' => $this->getMyDynamicVarByParamKey($myParamKey),
+        ];
     }
 }
