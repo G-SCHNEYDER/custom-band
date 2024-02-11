@@ -71,15 +71,19 @@ class Custom_Band extends Module
             Configuration::updateValue('CUSTOM_BAND_TEXT', '');
             Configuration::updateValue('CUSTOM_BAND_BG_COLOR', '');
             Configuration::updateValue('CUSTOM_BAND_TEXT_COLOR', '');
-            Configuration::updateValue('CUSTOM_BAND_AFFICHAGE_KDO', '');
+            Configuration::updateValue('CUSTOM_BAND_AFFICHAGE_EMOJI', false);
+            Configuration::updateValue('CUSTOM_BAND_EMOJI_CHOICE', '');
+            Configuration::updateValue('CUSTOM_BAND_DEFILEMENT', false);
     }
 
     public function uninstall()
     {
-        Configuration::deleteByName('CUSTOM_BAND_AFFICHAGE_KDO');
+        Configuration::deleteByName('CUSTOM_BAND_AFFICHAGE_EMOJI');
+        Configuration::deleteByName('CUSTOM_BAND_EMOJI_CHOICE');
         Configuration::deleteByName('CUSTOM_BAND_TEXT');
         Configuration::deleteByName('CUSTOM_BAND_BG_COLOR');
         Configuration::deleteByName('CUSTOM_BAND_TEXT_COLOR');
+        Configuration::deleteByName('CUSTOM_BAND_DEFILEMENT');
 
         include(dirname(__FILE__).'/sql/uninstall.php');
 
@@ -167,11 +171,22 @@ class Custom_Band extends Module
                         'label' => $this->l('Couleur de fond'),
                     ),
                     array(
+                        'type' => 'select',
+                        'label' => $this->l('Choix de l\'emoji'),
+                        'name' => 'CUSTOM_BAND_EMOJI_CHOICE',
+                        'desc' => $this->l('Sélectionnez l\'emoji à afficher à la fin de votre message'),
+                        'options' => array(
+                            'query' => $this->getEmojiList(true),                           
+                            'id' => 'id_option',                        
+                            'name' => 'emoji'                         
+                        ),
+                    ),
+                    array(
                         'type' => 'switch',
-                        'label' => $this->l('Activer l\'émoji cadeau'),
-                        'name' => 'CUSTOM_BAND_AFFICHAGE_KDO',
+                        'label' => $this->l('Activer l\'émoji en fin de phrase'),
+                        'name' => 'CUSTOM_BAND_AFFICHAGE_EMOJI',
                         'is_bool' => true,
-                        'desc' => $this->l('Permet l\'activation de l\'affichage d\'un émoji cadeau à la fin de la phrase'),
+                        'desc' => $this->l('Permet l\'activation de l\'affichage d\'un émoji à la fin de la phrase'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
@@ -218,7 +233,8 @@ class Custom_Band extends Module
     protected function getConfigFormValues()
     {
         return array(
-            'CUSTOM_BAND_AFFICHAGE_KDO' => Configuration::get('CUSTOM_BAND_AFFICHAGE_KDO', true),
+            'CUSTOM_BAND_EMOJI_CHOICE' => Configuration::get('CUSTOM_BAND_EMOJI_CHOICE'),
+            'CUSTOM_BAND_AFFICHAGE_EMOJI' => Configuration::get('CUSTOM_BAND_AFFICHAGE_EMOJI', true),
             'CUSTOM_BAND_DEFILEMENT' => Configuration::get('CUSTOM_BAND_DEFILEMENT', true),
             'CUSTOM_BAND_TEXT' => Configuration::get('CUSTOM_BAND_TEXT'),
             'CUSTOM_BAND_BG_COLOR' => Configuration::get('CUSTOM_BAND_BG_COLOR', null),
@@ -261,7 +277,8 @@ class Custom_Band extends Module
     public function hookDisplayTop()
     {
         $this->context->smarty->assign([
-            'banner_allow_kdo' => Configuration::get('CUSTOM_BAND_AFFICHAGE_KDO'),
+            'banner_emoji_choice' => $this->getEmojiBySlug(Configuration::get('CUSTOM_BAND_EMOJI_CHOICE')),
+            'banner_allow_emoji' => Configuration::get('CUSTOM_BAND_AFFICHAGE_EMOJI'),
             'banner_color' => Configuration::get('CUSTOM_BAND_BG_COLOR'),
             'banner_message' => Configuration::get('CUSTOM_BAND_TEXT'),
             'banner_text_color' => Configuration::get('CUSTOM_BAND_TEXT_COLOR'),
@@ -272,8 +289,61 @@ class Custom_Band extends Module
     }
 
     /**
+     * Get the emoji list in an array
+     * @param boolean $withslug - Adds slug next to emoji if enabled
+     */
+    public function getEmojiList($withslug = false)
+    {
+
+        $emoji_list = [];
+
+        $json = file_get_contents($this->local_path.'Ressources/emoji.json'); 
+
+        $json_data = json_decode($json,true);
+
+        foreach ($json_data as $key => $value) {
+            if($withslug){
+                $emoji_list[] = array(
+                    'id_option' => $value['slug'],
+                    'emoji' => $key." ".$value['slug'],
+                );
+            }else{
+                $emoji_list[] = array(
+                    'id_option' => $value['slug'],
+                    'emoji' => $key,
+                );
+            }
+            
+        }
+
+        return $emoji_list;
+
+    }
+
+    /**
+     * Get emoji from the returned slug
+     * @param string $slug - slug from the emoji to find
+     */
+    public function getEmojiBySlug($slug)
+    {
+        $list_emoji = $this->getEmojiList();
+
+        $emoji_searched = "";
+
+        foreach ($list_emoji as $key => $value) {
+            if($value["id_option"] == $slug){
+                $emoji_searched = $value["emoji"];
+                break;
+            }
+        }
+
+        return $emoji_searched;
+    }
+
+    /**
      * Function for displaying a widget
-     * Example of widget {widget name='mymodule' text_to_display='Welcome new customer'}
+     * Example of widget {widget name='mymodule' banner_message='Welcome new customer'}
+     * All non specified parameters will use default parameters from config
      */
     public function renderWidget($hookName, array $configuration)
     {
@@ -287,13 +357,15 @@ class Custom_Band extends Module
      */
     public function getWidgetVariables($hookName, array $configuration)
     {
-        $myParamKey = $configuration['text_to_display'] ?? null;
         
         return [
-            'my_var1' => 'my_var1_value',
-            'my_var2' => 'my_var2_value',
-            'my_var_n' => 'my_var_n_value',
-            'my_dynamic_var_by_param' => $this->getMyDynamicVarByParamKey($myParamKey),
+            'banner_emoji_choice' => $configuration['banner_emoji_choice'] ?? $this->getEmojiBySlug(Configuration::get('CUSTOM_BAND_EMOJI_CHOICE')),
+            'banner_allow_emoji' => $configuration['banner_allow_emoji'] ?? Configuration::get('CUSTOM_BAND_AFFICHAGE_EMOJI'),
+            'banner_color' => $configuration['banner_color'] ?? Configuration::get('CUSTOM_BAND_BG_COLOR'),
+            'banner_message' => $configuration['banner_message'] ?? Configuration::get('CUSTOM_BAND_TEXT'),
+            'banner_text_color' => $configuration['banner_text_color'] ?? Configuration::get('CUSTOM_BAND_TEXT_COLOR'),
+            'banner_defilement' => $configuration['banner_defilement'] ?? Configuration::get('CUSTOM_BAND_DEFILEMENT'),
         ];
     }
+
 }

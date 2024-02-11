@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>custom_band</name>
+    <displayName><![CDATA[Bandeau dinformation customisable]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Affichage de bandeaux d&#039;informations customisables sur votre boutique]]></description>
+    <author><![CDATA[G_SCHNEYDER]]></author>
+    <tab><![CDATA[front_office_features]]></tab>
+	<confirmUninstall><![CDATA[Etes-vous sûr de vouloir supprimer ce module ?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
+</module>
